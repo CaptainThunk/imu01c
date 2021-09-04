@@ -117,6 +117,7 @@ LSM303D_MAG_SCALE_12            = 0x60
 
 LSM303D_ACCEL_SCALE             = 2     # +/- 2g
 TEMPERATURE_CELSIUS_OFFSET 		= 14    # offset for temperature calc (guesswork) originally 18
+TILT_HEADING_OFFSET             = 0     # offset for Tilt Heading for correction
 
 X = 0
 Y = 1
@@ -227,34 +228,37 @@ class accelcomp:
 
     def getHeading(self):
 
-        heading = 180 * math.atan2(self.mag[Y], self.mag[X])/math.pi
-        if(heading < 0):
-            heading += 360
+        # Alternative method, doesn't seem to work
+        # heading = 180 * math.atan2(self.mag[Y], self.mag[X])/math.pi
+        # if(heading < 0):
+        #     heading += 360
 
-        self.headingDegrees = heading
+        # self.headingDegrees = heading
 
-        mtMagX = self.mag[X] / 450 * 100.0
-        mtMagY = self.mag[Y] / 450 * 100.0
-        mtMagY = self.mag[Z] / 400 * 100.0
+        # mtMagX = self.mag[X] / 450 * 100.0
+        # mtMagY = self.mag[Y] / 450 * 100.0
+        # mtMagY = self.mag[Z] / 400 * 100.0
 
-        self.heading = math.atan2(mtMagX, mtMagY)
+        # self.heading = math.atan2(mtMagX, mtMagY)
 
 
 
         # original, it's 90 deg out
-#        self.heading = math.atan2(self.mag[X], self.mag[Y])
+       self.heading = math.atan2(self.mag[X], self.mag[Y])
 
-#        if self.heading < 0:
-#            self.heading += 2*math.pi
-#        if self.heading > 2*math.pi:
-#            self.heading -= 2*math.pi
+       if self.heading < 0:
+           self.heading += 2*math.pi
+       if self.heading > 2*math.pi:
+           self.heading -= 2*math.pi
 
-#        self.headingDegrees = round(math.degrees(self.heading),2)
+       self.headingDegrees = round(math.degrees(self.heading),2)
 
     def getTiltHeading(self):
         truncate = [0,0,0]
         for i in range(X, Z+1):
             truncate[i] = math.copysign(min(math.fabs(self.accel[i]), 1.0), self.accel[i])
+            # truncate[i] = math.copysign(min(math.fabs(self.gyro[i]), 1.0), self.gyro[i])
+
         try:
             pitch = math.asin(-1*truncate[X])
             roll = math.asin(truncate[Y]/math.cos(pitch)) if abs(math.cos(pitch)) >= abs(truncate[Y]) else 0
@@ -269,12 +273,20 @@ class accelcomp:
                                self.mag[Z] * math.cos(roll) * math.cos(pitch)
             self.tiltHeading = math.atan2(self.tiltcomp[Y], self.tiltcomp[X])
 
-            if self.tiltHeading < 0:
-                self.tiltHeading += 2*math.pi
-            if self.tiltHeading > 2*math.pi:
-                self.heading -= 2*math.pi
+            # if self.tiltHeading < 0:
+            #     self.tiltHeading += 2*math.pi
+            # if self.tiltHeading > 2*math.pi:
+            #     self.tiltHeading -= 2*math.pi
 
             self.tiltHeadingDegrees = round(math.degrees(self.tiltHeading),2)
+
+            self.tiltHeadingDegrees += TILT_HEADING_OFFSET
+            if(self.tiltHeadingDegrees < 0):
+                self.tiltHeadingDegrees += 360
+            
+            if(self.tiltHeadingDegrees >= 360):
+                self.tiltHeadingDegrees -= 360
+            
             # print("AccelX {}, AccelY {}".format(self.accel[X], self.accel[Y]))
             # print("TruncX {}, TruncY {}".format(truncate[X], truncate[Y]))
             # print("Pitch {}, cos(pitch) {}, Bool(cos(pitch)) {}".format(pitch, math.cos(pitch), bool(math.cos(pitch))))
@@ -314,10 +326,10 @@ if __name__ == '__main__':
             print("Not Ready!")
             sleep(.01)
         lsm.getMag()
-        lsm.getHeading()
-        lsm.getTiltHeading()
         lsm.getAccel()
         lsm.getGyro()
+        lsm.getHeading()
+        lsm.getTiltHeading()
         print('{0:12} |{1:12}|{2:12} || {3:12} |{4:12} |{5:12} || {6:12} |{7:12} |{8:12} || {9:12} deg |  {10:12} deg | {11:12} degrees'.format(
                 lsm.accel[X], lsm.accel[Y], lsm.accel[Z], lsm.mag[X], lsm.mag[Y], lsm.mag[Z], lsm.gyro[X], lsm.gyro[Y], lsm.gyro[Z], lsm.headingDegrees, lsm.tiltHeadingDegrees, temp2))
         # print('{0:3} |{1:3} |{2:3}'.format(lsm.accel[X], lsm.accel[Y], lsm.accel[Z]))

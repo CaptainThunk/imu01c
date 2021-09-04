@@ -301,7 +301,7 @@ namespace imu01cns {
 	}
 	
 	void imu01c::getHeading() { 
-	
+/*	
 		heading = 180 * atan2(mag_xyz[Y], mag_xyz[X]) / M_PI;
         if(heading < 0) {
             heading += 360;
@@ -316,18 +316,16 @@ namespace imu01cns {
         heading = atan2(mtMagX, mtMagY);
 		
 		/* original code - it's 90 deg out */
-        // heading = atan2(mag_xyz[X], mag_xyz[Y]);
+        heading = atan2(mag_xyz[X], mag_xyz[Y]);
 
-        // if(heading < 0) {
-            // heading += 2*M_PI;
-		// }
-        // if(heading > 2*M_PI) {
-            // heading -= 2*M_PI;
-		// }
+        if(heading < 0) {
+            heading += 2*M_PI;
+		}
+        if(heading > 2*M_PI) {
+            heading -= 2*M_PI;
+		}
 
-        
-		// headingDegrees = heading * (180.0 / M_PI); 		// radians to degrees
-		
+		headingDegrees = heading * (180.0 / M_PI); 		// radians to degrees
 	}
 	
 	void imu01c::getTiltHeading() {
@@ -338,6 +336,9 @@ namespace imu01cns {
 		truncate[X] = copysign(min(fabs(accel_xyz[X]), 1.0), accel_xyz[X]);
 		truncate[Y] = copysign(min(fabs(accel_xyz[Y]), 1.0), accel_xyz[Y]);
 		truncate[Z] = copysign(min(fabs(accel_xyz[Z]), 1.0), accel_xyz[Z]);
+		// truncate[X] = copysign(min(fabs(gyro_xyz[X]), 1.0), gyro_xyz[X]);
+		// truncate[Y] = copysign(min(fabs(gyro_xyz[Y]), 1.0), gyro_xyz[Y]);
+		// truncate[Z] = copysign(min(fabs(gyro_xyz[Z]), 1.0), gyro_xyz[Z]);
 		// printf("TruncX: %.2f, TruncY: %.2f, TruncZ: %.2f \r\n",truncate[X], truncate[Y], truncate[Z]);
         try
 		{	
@@ -357,7 +358,7 @@ namespace imu01cns {
             tiltcomp[Y] = mag_xyz[X] * sin(roll) * sin(pitch) + mag_xyz[Y] * cos(roll) - mag_xyz[Z] * sin(roll) * cos(pitch);
             tiltcomp[Z] = mag_xyz[X] * cos(roll) * sin(pitch) + mag_xyz[Y] * sin(roll) + mag_xyz[Z] * cos(roll) * cos(pitch);
             tiltHeading = atan2(tiltcomp[Y], tiltcomp[X]);
-
+/*
             if(tiltHeading < 0) {
                 tiltHeading += 2*M_PI;
 			}
@@ -365,7 +366,7 @@ namespace imu01cns {
 				heading -= 2*M_PI;
                 // tiltHeading -= 2*M_PI;
 			}
-
+/**/
             tiltHeadingDegrees = tiltHeading * (180.0 / M_PI);
 
 			tiltHeadingDegrees += TILT_HEADING_OFFSET;

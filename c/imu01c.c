@@ -237,12 +237,11 @@ void imu01c_getL3GD20HTemperature(imu01cClass *self) {
 }
 
 void imu01c_getHeading(imu01cClass *self) { 
-	
+	/*
 	self->heading = 180 * atan2(self->mag_xyz[Y], self->mag_xyz[X]) / M_PI;
 	if(self->heading < 0) {
 		self->heading += 360;
 	}
-
 	self->headingDegrees = self->heading;
 
 	double mtMagX = self->mag_xyz[X] / 450 * 100.0;
@@ -251,19 +250,18 @@ void imu01c_getHeading(imu01cClass *self) {
 
 	self->heading = atan2(mtMagX, mtMagY);
 	
+
 	/* original code - it's 90 deg out */
-	// heading = atan2(mag_xyz[X], mag_xyz[Y]);
+	self->heading = atan2(self->mag_xyz[X], self->mag_xyz[Y]);
 
-	// if(heading < 0) {
-		// heading += 2*M_PI;
-	// }
-	// if(heading > 2*M_PI) {
-		// heading -= 2*M_PI;
-	// }
+	if(self->heading < 0) {
+		self->heading += 2*M_PI;
+	}
+	if(self->heading > 2*M_PI) {
+		self->heading -= 2*M_PI;
+	}
 
-	
-	// headingDegrees = heading * (180.0 / M_PI); 		// radians to degrees
-/**/
+	self->headingDegrees = self->heading * (180.0 / M_PI); 		// radians to degrees
 }
 
 bool imu01c_isMagReady(imu01cClass *self) { 
@@ -292,6 +290,9 @@ void imu01c_getTiltHeading(imu01cClass *self) {
 	truncate[X] = copysign(min(fabs(self->accel_xyz[X]), 1.0), self->accel_xyz[X]);
 	truncate[Y] = copysign(min(fabs(self->accel_xyz[Y]), 1.0), self->accel_xyz[Y]);
 	truncate[Z] = copysign(min(fabs(self->accel_xyz[Z]), 1.0), self->accel_xyz[Z]);
+	// truncate[X] = copysign(min(fabs(self->gyro_xyz[X]), 1.0), self->gyro_xyz[X]);
+	// truncate[Y] = copysign(min(fabs(self->gyro_xyz[Y]), 1.0), self->gyro_xyz[Y]);
+	// truncate[Z] = copysign(min(fabs(self->gyro_xyz[Z]), 1.0), self->gyro_xyz[Z]);
 	
 	pitch = asin(-1*truncate[X]);
 	
@@ -309,7 +310,7 @@ void imu01c_getTiltHeading(imu01cClass *self) {
 	tiltcomp[Y] = self->mag_xyz[X] * sin(roll) * sin(pitch) + self->mag_xyz[Y] * cos(roll) - self->mag_xyz[Z] * sin(roll) * cos(pitch);
 	tiltcomp[Z] = self->mag_xyz[X] * cos(roll) * sin(pitch) + self->mag_xyz[Y] * sin(roll) + self->mag_xyz[Z] * cos(roll) * cos(pitch);
 	self->tiltHeading = atan2(tiltcomp[Y], tiltcomp[X]);
-
+/*
 	if(self->tiltHeading < 0) {
 		self->tiltHeading += 2*M_PI;
 	}
@@ -317,7 +318,7 @@ void imu01c_getTiltHeading(imu01cClass *self) {
 		self->heading -= 2*M_PI;
 		// self->tiltHeading -= 2*M_PI;
 	}
-
+/**/
 	self->tiltHeadingDegrees = self->tiltHeading * (180.0 / M_PI);
 
 	self->tiltHeadingDegrees += TILT_HEADING_OFFSET;
