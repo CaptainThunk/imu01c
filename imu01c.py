@@ -315,8 +315,9 @@ if __name__ == '__main__':
 
     lsm = accelcomp()
 
-    print ('         Accel.                                ||             Compass             ||             Gyro             ||                Heading	     ||      Temp')
-    print ('       x       |       y       |       z       ||     x     |     y     |     z     ||     x     |     y     |     z     ||        calc      | tilt corrected  ||')
+    print ('______________________________________________________________________________________________________________________________')
+    print ('      Accelerometer      ||         Gyroscope        ||       Magnetometer       ||      Heading      ||      Temperature     ')
+    print ('   x   |    y   |    z   ||    x   |    y   |    z   ||    x   |   y    |    z   ||   Calc  |   Tilt  ||  LSM303D  |  L3GD20H ')
     while True:
 
         temp = lsm.getLSM303DTemp()
@@ -330,8 +331,14 @@ if __name__ == '__main__':
         lsm.getGyro()
         lsm.getHeading()
         lsm.getTiltHeading()
-        print('{0:12} |{1:12}|{2:12} || {3:12} |{4:12} |{5:12} || {6:12} |{7:12} |{8:12} || {9:12} deg |  {10:12} deg | {11:12} degrees'.format(
-                lsm.accel[X], lsm.accel[Y], lsm.accel[Z], lsm.mag[X], lsm.mag[Y], lsm.mag[Z], lsm.gyro[X], lsm.gyro[Y], lsm.gyro[Z], lsm.headingDegrees, lsm.tiltHeadingDegrees, temp2))
+        print('{0:2.4f} | {1:2.4f} | {2:2.4f} || {3:6d} | {4:6d} | {5:6d} || {6:6d} | {7:6d} | {8:6d} || {9:6.2f}° | {10:6.2f}° || {11:6.2f} °C | {12:6.2f} °C'.format(
+                lsm.accel[X], lsm.accel[Y], lsm.accel[Z], 
+                lsm.gyro[X], lsm.gyro[Y], lsm.gyro[Z], 
+                lsm.mag[X], lsm.mag[Y], lsm.mag[Z], 
+                lsm.headingDegrees, lsm.tiltHeadingDegrees, 
+                temp, temp2)
+        )
+ 
         # print('{0:3} |{1:3} |{2:3}'.format(lsm.accel[X], lsm.accel[Y], lsm.accel[Z]))
         sleep(.5)
 
