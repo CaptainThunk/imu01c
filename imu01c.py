@@ -116,7 +116,8 @@ LSM303D_MAG_SCALE_12            = 0x60
 
 
 LSM303D_ACCEL_SCALE             = 2     # +/- 2g
-TEMPERATURE_CELSIUS_OFFSET 		= 14    # offset for temperature calc (guesswork) originally 18
+L3GD20H_TEMPERATURE_OFFSET 		= 0     # offset for temperature calc (guesswork) originally 18
+LSM303D_TEMPERATURE_OFFSET 		= 0     # offset for temperature calc (guesswork) originally 18
 TILT_HEADING_OFFSET             = 0     # offset for Tilt Heading for correction
 
 X = 0
@@ -199,32 +200,36 @@ class accelcomp:
                           bus.read_byte_data(L3GD20H_ADDRESS, L3GD20H_REGISTER_OUT_Z_L), 16)
                           
     def getL3GD20HTemp(self):
-        temp = twos_comp(bus.read_byte_data(L3GD20H_ADDRESS, L3GD20H_REGISTER_OUT_TEMP), 8)
+        temp = twos_comp(bus.read_byte_data(L3GD20H_ADDRESS, L3GD20H_REGISTER_OUT_TEMP), 16)
        
-        return (temp / 8.0) + TEMPERATURE_CELSIUS_OFFSET
+        return (temp / 8.0) + L3GD20H_TEMPERATURE_OFFSET
         
     def getLSM303DTemp(self):
-        # temp = twos_comp(bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_H_M) << 8 | 
-                # bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_L_M), 12)
-        #temp = (bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_H_M) >> 8 | bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_L_M) << 8)    
-        # temp = twos_comp(bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_H_M) << 8 | 
-                 # bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_L_M) >> 8, 12)
-        #if temp & (1 << 11):
-        #    temp = (temp & ((1 << 12) -1)) - (1 << 12)
+        # temp = twos_comp(bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_H) << 8 | 
+                # bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_L), 12)
+                
+        # temp = (bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_H) >> 8 | bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_L) << 8)    
+        # temp = twos_comp(bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_H) << 8 | 
+                 # bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_L), 12)
+        # if temp & (1 << 11):
+           # temp = (temp & ((1 << 12) -1)) - (1 << 12)
             
         
-        # print(bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_H_M))
-        # print(bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_L_M))
+        # print(bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_H))
+        # print(bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_L))
         # print("Temp {}".format(temp))
         
-        # thi = bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_H_M)
-        # tlo = bus.read_byte_data(LSM303D_ADDRESS_MAG, LSM303D_REGISTER_MAG_TEMP_OUT_L_M)
-       # print(thi << 4, tlo << 8)
-        temp = twos_comp(((bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_H) << 8) | bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_L)) >> 4, 12)
-        #temp = (temp / 8.0) + TEMPERATURE_CELSIUS_OFFSET
+        # thi = bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_H)
+        # tlo = bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_L)
+        # print(thi , tlo)
+        #temp = (temp / 8.0) + LSM303D_TEMPERATURE_OFFSET
         # temp = ((thi * 16) + (tlo / 16))
-        #temp = (thi / 16) + (tlo / 256)
-        return (temp / 8.0) + TEMPERATURE_CELSIUS_OFFSET
+        # temp = (thi / 16) + (tlo / 256)
+        
+        
+        
+        temp = twos_comp(((bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_H) >> 4) << 8 | bus.read_byte_data(LSM303D_ADDRESS, LSM303D_REGISTER_TEMP_OUT_L)), 12)
+        return (temp / 8.0) + LSM303D_TEMPERATURE_OFFSET
 
     def getHeading(self):
 

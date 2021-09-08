@@ -115,7 +115,8 @@ class imu01c:
     LSM303D_MAG_SCALE_12            = 0x60
 
     LSM303D_ACCEL_SCALE             = 2     # +/- 2g
-    TEMPERATURE_CELSIUS_OFFSET 		= 14    # offset for temperature calc (guesswork) originally 18
+    L3GD20H_TEMPERATURE_OFFSET 		= 0     # offset for temperature calc (guesswork) originally 18
+    LSM303D_TEMPERATURE_OFFSET 		= 0     # offset for temperature calc (guesswork) originally 18
     TILT_HEADING_OFFSET             = 0     # 
 
     mag = [0,0,0]
@@ -228,16 +229,16 @@ class imu01c:
     def getL3GD20HTemp(self):
         self.setup()
         
-        temp = self._twos_comp(self._i2c_read_byte(self.L3GD20H_ADDRESS, self.L3GD20H_REGISTER_OUT_TEMP), 8)
+        temp = self._twos_comp(self._i2c_read_byte(self.L3GD20H_ADDRESS, self.L3GD20H_REGISTER_OUT_TEMP), 16)
        
-        return (temp / 8.0) + self.TEMPERATURE_CELSIUS_OFFSET
+        return (temp / 8.0) + self.L3GD20H_TEMPERATURE_OFFSET
         
     def getLSM303DTemp(self):
         self.setup()
         
-        temp = self._twos_comp(((self._i2c_read_byte(self.LSM303D_ADDRESS, self.LSM303D_REGISTER_TEMP_OUT_H) << 8) | self._i2c_read_byte(self.LSM303D_ADDRESS, self.LSM303D_REGISTER_TEMP_OUT_L)) >> 4, 12)
+        temp = self._twos_comp(((self._i2c_read_byte(self.LSM303D_ADDRESS, self.LSM303D_REGISTER_TEMP_OUT_H) >> 4) << 8 | self._i2c_read_byte(self.LSM303D_ADDRESS, self.LSM303D_REGISTER_TEMP_OUT_L)), 12)
         
-        return (temp / 8.0) + self.TEMPERATURE_CELSIUS_OFFSET
+        return (temp / 8.0) + self.LSM303D_TEMPERATURE_OFFSET
 
     def getHeading(self):
         # original
